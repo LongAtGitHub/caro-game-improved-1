@@ -61,9 +61,11 @@ public class CaroBoard {
             locationY+=gridSize;
             locationX =0;
         }
+        // debug
         // Grid grid = new Grid(gridSize, locationX, locationY, 0, 0);
         // mainBoard.add(grid);
-        // Grid grid2 = new Grid(gridSize, locationX, locationY, 0, 1);
+        // Grid grid2 = new Grid(gridSize, locationX+gridSize, locationY, 0, 1);
+        // System.out.println(grid2.getX() == locationX+gridSize);
         // mainBoard.add(grid2);
 
 
