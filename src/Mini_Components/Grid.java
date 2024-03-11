@@ -23,9 +23,10 @@ public class Grid extends Rectangle {
      * @param indexY Give me a name id for y-index
      */
     public Grid(double size, double x, double y, int indexX, int indexY) {
-        super(size, size, x, y);
+        super(x, y, size, size);
         this.indexX = indexX;
         this.indexY = indexY;
+        this.setStrokeWidth(5);
     }
 
     
