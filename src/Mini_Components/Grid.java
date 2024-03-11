@@ -14,6 +14,14 @@ public class Grid extends Rectangle {
     }
 
     // Constructor 
+    /**
+     * Grid constructor
+     * @param size how big is the grid?
+     * @param x where is it in x location?
+     * @param y where is it in y location?
+     * @param indexX Give me a name id for x-index
+     * @param indexY Give me a name id for y-index
+     */
     public Grid(double size, double x, double y, int indexX, int indexY) {
         super(size, size, x, y);
         this.indexX = indexX;
