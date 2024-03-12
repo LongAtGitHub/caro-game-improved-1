@@ -8,36 +8,37 @@ import edu.macalester.graphics.Point;
 import edu.macalester.graphics.ui.*;
 import Mini_Components.Grid;
 
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.List;
 import algorithms.*;
-public class CaroBoard {
+public class GameCaro {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    private int WIDTH = (int) screenSize.getWidth();
-    private int HEIGHT = (int) screenSize.getHeight();
-    private int numGridN = 3;
-    private int numGridM = 3;
-    private double boardStartX = WIDTH * 1/20;
-    private double boardStartY = HEIGHT * 2/20;
-    private Grid[][] gridArray;
-    private Character[][] charArray; // support array
+    protected int WIDTH = (int) screenSize.getWidth();
+    protected int HEIGHT = (int) screenSize.getHeight();
+    protected int numGridN = 3;
+    protected int numGridM = 3;
+    protected double boardStartX = WIDTH * 1/20;
+    protected double boardStartY = HEIGHT * 2/20;
+    protected Grid[][] gridArray;
+    protected Character[][] charArray; // support array
 
-    private double boardHeight;
+    protected double boardHeight;
         
-    private double gridSize;
+    protected double gridSize;
 
-    private Character currentTurn=  'X';
-    private CheckWin winChecker; 
-    private int gameState = 0; private int fillUpNum=0;
+    protected Character currentTurn=  'X'; // current turn mark
+    protected CheckWin winChecker; 
+    protected int gameState = 0; protected int fillUpNum=0;
 
-    private Image imageTurn;
-    private GraphicsText gameStatus;
+    protected Image imageTurn;
+    protected GraphicsText gameStatus;
+    protected CanvasWindow canva;
 
-
-    public CaroBoard(int numGridM, int numGridN) {
+    public GameCaro(int numGridM, int numGridN) {
         if (numGridM<3 || numGridN<3) { 
             System.err.println("num grid too small");
             return;
@@ -46,7 +47,6 @@ public class CaroBoard {
         this.numGridM = numGridM;
         this.numGridN = numGridN;
         this.boardHeight = HEIGHT * 15/20;
-        // this.gridSize = Math.min(WIDTH /numGridN, boardHeight / numGridM);
         this.gridSize = WIDTH/ numGridN *0.8;
         gridArray = new Grid[this.numGridM][this.numGridN];
         
@@ -57,10 +57,23 @@ public class CaroBoard {
         if (numGridM>3 && numGridN>3)  targetCount = 5;
         System.out.println(targetCount);
         winChecker = new CheckWin(numGridM,numGridN,targetCount);
-        
     }
 
-    public GraphicsGroup UI() {
+    // default constructor
+    public GameCaro() {
+        this.numGridM = 12;
+        this.numGridN = 20;
+        this.boardHeight = HEIGHT * 15/20;
+        this.gridSize = WIDTH/ numGridN *0.8;
+        gridArray = new Grid[this.numGridM][this.numGridN];
+        charArray = new Character[numGridM][numGridN];
+        Integer targetCount = 3;
+        if (numGridM>3 && numGridN>3)  targetCount = 5;
+        System.out.println(targetCount);
+        winChecker = new CheckWin(numGridM,numGridN,targetCount);
+    }
+
+    protected GraphicsGroup UI() {
         double unitX = WIDTH/ 20;
         double uiYLocation = HEIGHT/ 20;
         GraphicsGroup ui = new GraphicsGroup(boardStartX, uiYLocation);
@@ -70,6 +83,7 @@ public class CaroBoard {
         text.setFontStyle(FontStyle.BOLD);  // Set font style to bold
 
         Button playAgain = new Button("Play Again");
+        playAgain.onClick(() -> { resetGame(); });
         playAgain.setPosition(10*unitX , 0);
         Button menu = new Button("Menu");
         menu.setPosition(10*unitX+ 100, 0);
@@ -95,7 +109,13 @@ public class CaroBoard {
         return ui;
     }
 
-    public GraphicsGroup getInitGameBoard() {
+    protected void resetGame() {
+        this.canva.closeWindow();
+        GameCaro newGame = new GameCaro(12, 20); 
+        newGame.gameComplete();
+    }
+
+    protected GraphicsGroup getInitGameBoard() {
         GraphicsGroup getInitGameBoard = new GraphicsGroup(boardStartX, boardStartY);
         double locationX = 0;
         double locationY= 0;
@@ -118,7 +138,7 @@ public class CaroBoard {
      * @param pos position of canvas onclick mouse event
      * @return  an 2D array of [indexI, indexJ] to specify the grid
      */
-    public ArrayList<Integer> translatePointToGrid(Point pos) {
+    protected ArrayList<Integer> translatePointToGrid(Point pos) {
         Point upperRef = new Point(this.boardStartX + numGridN * gridSize, boardStartY+ numGridM* gridSize);
         Boolean checkBoundX = boardStartX<= pos.getX() && pos.getX() <= upperRef.getX();
         Boolean checkBoundY = boardStartY <= pos.getY() && pos.getY() <= upperRef.getY();
@@ -138,13 +158,14 @@ public class CaroBoard {
         return new ArrayList<Integer>() {{ add(i); add(j); }};
     }
 
-    public void setNextTurnChar() {
+    protected void setNextTurnChar() {
         if (this.currentTurn=='X') { currentTurn = 'O';}
         else if (this.currentTurn=='O') { currentTurn = 'X';}
         return;
     }
 
-    public void gameProgress(CanvasWindow canva) {
+    // Game progress logics
+    protected void gameProgress(CanvasWindow canva) {
         canva.onClick((event -> {
             if (gameState == 1 || gameState== -1 || fillUpNum >= numGridM*numGridN) {
                 return;
@@ -166,7 +187,8 @@ public class CaroBoard {
         }));   
     }
 
-    public void changeGameStatusUIVal() {
+    // Change the gameStatus graphic text text content
+    protected void changeGameStatusUIVal() {
         if (gameState == 1) {
             this.gameStatus.setText("X wins");
             this.gameStatus.setFillColor(new Color(255,0,0));
@@ -184,13 +206,13 @@ public class CaroBoard {
             gameStatus.setText("Ongoing");
     }
 
-    public void setXOImagePath() {
-        System.out.println("Hey I changed path???");
+    protected void setXOImagePath() {
+        // System.out.println("Hey I changed path???");
         if (currentTurn == 'X') { this.imageTurn.setImagePath("img/X.png");}
         else {imageTurn.setImagePath("img/O.png");}
     }
 
-    public void printCharArray() {
+    protected void printCharArray() {
         for (int i = 0; i < numGridM; i++) {
             for (int j = 0; j < numGridN; j++) {
                 System.out.print(charArray[i][j] + " ");
@@ -199,9 +221,10 @@ public class CaroBoard {
         }
     }
 
+    // display the complete game
     public void gameComplete() {  
         // add components
-        CanvasWindow canva = new CanvasWindow("Caro Game", WIDTH, HEIGHT); 
+        this.canva = new CanvasWindow("Caro Game", WIDTH, HEIGHT); 
         canva.add(this.UI());
         canva.add(this.getInitGameBoard());
         canva.draw();
@@ -209,7 +232,7 @@ public class CaroBoard {
     }
 
     public static void main(String[] args) {
-        CaroBoard game = new CaroBoard(12, 20);
+        GameCaro game = new GameCaro(12, 20);
         game.gameComplete();
     }
 }

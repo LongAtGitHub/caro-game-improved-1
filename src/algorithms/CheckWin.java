@@ -1,5 +1,4 @@
 package algorithms;
-import java.lang.Math;
 
 public class CheckWin {
     /**
@@ -82,12 +81,9 @@ public class CheckWin {
             i+= deltaI; j+=deltaJ;
             if (checkBound(i, j) && this.arr[i][j] == this.charVal ) {
                 count+=1;
-                // System.out.println(i+" backward "+ j);
-             
             }
             else break;
         }
-        // System.out.println(count);
         return count;
     }
 
