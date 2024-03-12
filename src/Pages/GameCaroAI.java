@@ -31,15 +31,17 @@ public class GameCaroAI extends GameCaro{
                 for (int t=0; t<1000; t++)
                 {
                     if (hasHumanCompletedTurn) { break;}
-                    else {
-                        hasHumanCompletedTurn = humanPlay(event);
-                    }
+                    else hasHumanCompletedTurn = humanPlay(event);
                 }
                 humanTurn = !humanTurn;
             }
+
+            System.out.println("hey I should be here first");
+            canva.draw();
+            delay(500);
+
             changeGameStatusUIVal();
             if (gameState == 1 || gameState== -1 || fillUpNum >= numGridM*numGridN) { return;}
-            
             if (!humanTurn)  {
                 
                 botPlay();
@@ -48,12 +50,20 @@ public class GameCaroAI extends GameCaro{
         }));   
     }
 
+    // Define a method to handle the sleep with InterruptedException
+public void delay(long milliseconds) {
+    try {
+        Thread.sleep(milliseconds);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
     @Override
     protected void resetGame() {
-            this.canva.closeWindow();
-            GameCaroAI newGame = new GameCaroAI(12, 20); 
-            newGame.gameComplete();
-        }
+        this.canva.closeWindow();
+        GameCaroAI newGame = new GameCaroAI(12, 20); 
+        newGame.gameComplete();
+    }
     
 
     protected Boolean humanPlay(MouseButtonEvent event) {
