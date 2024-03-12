@@ -28,14 +28,11 @@ public class Grid extends GraphicsGroup {
         this.indexY = indexY;
 
         this.rectangle = new Rectangle(0, 0, size, size);
-        this.rectangle.setStrokeWidth(5);
+        this.rectangle.setStrokeWidth(3);
         this.add(rectangle);
         this.gridSize = size;
 
         this.imageMargin  = size/10;
-        
-        // this.setCharValue('X');
-        // System.out.println("wrasfas");
     }
 
     public double getSquareSize() {
@@ -62,7 +59,7 @@ public class Grid extends GraphicsGroup {
         this.image.setMaxHeight(gridSize);
 
         this.add(image, 0,0);
-        System.out.println("I am grid" + indexX + " " + indexY);
+        // System.out.println("I am grid" + indexX + " " + indexY);
         return true;
     }
 }

@@ -1,3 +1,4 @@
+package test;
 import edu.macalester.graphics.*;
 import edu.macalester.graphics.ui.TextField;
 public class helllo {

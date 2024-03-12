@@ -2,18 +2,15 @@ package Pages;
 import edu.macalester.graphics.CanvasWindow;
 import edu.macalester.graphics.FontStyle;
 import edu.macalester.graphics.GraphicsGroup;
-import edu.macalester.graphics.GraphicsObject;
 import edu.macalester.graphics.GraphicsText;
 import edu.macalester.graphics.Point;
 import edu.macalester.graphics.ui.*;
 import Mini_Components.Grid;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
-
-
+import algorithms.*;
 public class CaroBoard {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     private int WIDTH = (int) screenSize.getWidth();
@@ -23,19 +20,39 @@ public class CaroBoard {
     private double boardStartX = WIDTH * 1/20;
     private double boardStartY = HEIGHT * 2/20;
     private Grid[][] gridArray;
+    private Character[][] charArray; // support array
 
     private double boardHeight;
         
     private double gridSize;
 
+    private Character currentTurn=  'X';
+    private CheckWin winChecker; 
+    private int gameState = 0; private int fillUpNum=0;
+
 
 
     public CaroBoard(int numGridM, int numGridN) {
+        if (numGridM<3 || numGridN<3) { 
+            System.err.println("num grid too small");
+            return;
+        }
+
         this.numGridM = numGridM;
         this.numGridN = numGridN;
         this.boardHeight = HEIGHT * 15/20;
-        this.gridSize = Math.min(WIDTH /numGridN, boardHeight / numGridM);
+        // this.gridSize = Math.min(WIDTH /numGridN, boardHeight / numGridM);
+        this.gridSize = WIDTH/ numGridN *0.8;
         gridArray = new Grid[this.numGridM][this.numGridN];
+        
+
+        // init checkwin object and support array to checkwin
+        charArray = new Character[numGridM][numGridN];
+        Integer targetCount = 3;
+        if (numGridM>3 && numGridN>3)  targetCount = 5;
+        System.out.println(targetCount);
+        winChecker = new CheckWin(numGridM,numGridN,targetCount);
+        
     }
 
     public GraphicsGroup UI() {
@@ -47,62 +64,35 @@ public class CaroBoard {
         text.setFontStyle(FontStyle.BOLD);  // Set font style to bold
 
         Button playAgain = new Button("Play Again");
-        playAgain.setPosition(WIDTH*1/4 , 0);
+        playAgain.setPosition(WIDTH*1/2.5 , 0);
         Button menu = new Button("Menu");
-        menu.setPosition(WIDTH*1/4+ 150, 0);
+        menu.setPosition(WIDTH*1/2.5+ 100, 0);
+
+        GraphicsText turn=  new GraphicsText("Current Turn",WIDTH*1/5,20);
         ui.add(text);
+        ui.add(turn);
         ui.add(playAgain);
         ui.add(menu);
+
         return ui;
     }
 
-    public GraphicsGroup mainBoard() {
-        
-        GraphicsGroup mainBoard = new GraphicsGroup(boardStartX, boardStartY);
-
-        // System.out.println(Math.min(WIDTH, boardHeight));
-        // System.out.println(gridSize);
-        
+    public GraphicsGroup getInitGameBoard() {
+        GraphicsGroup getInitGameBoard = new GraphicsGroup(boardStartX, boardStartY);
         double locationX = 0;
         double locationY= 0;
         for (int i=0; i< numGridM; i++) {
             for (int j=0; j< numGridN; j++) {
                 Grid grid= new Grid(gridSize, locationX, locationY, i, j);
+                charArray[i][j] = null;
                 gridArray[i][j] = grid;
-                mainBoard.add(gridArray[i][j]);
+                getInitGameBoard.add(gridArray[i][j]);
                 locationX+= gridSize;
             }
             locationY+=gridSize;
             locationX =0;
         }
-
-       
-      
-        // Grid grid2 = new Grid(gridSize, locationX+gridSize, locationY, 0, 1);
-        // System.out.println(grid2.getX() == locationX+gridSize);
-        // mainBoard.add(grid2);
-        return mainBoard;
-    }
-
-    public void displayComplete() {  
-        CanvasWindow canva = new CanvasWindow("Caro Game", WIDTH, HEIGHT); 
-        canva.add(this.UI());
-        canva.add(this.mainBoard());
-        canva.draw();
-        
-        canva.onClick((event -> {
-            List<Integer> indices = translatePointToGrid(event.getPosition());
-            if (indices == null) { return; }
-            
-            Integer i = indices.get(0);
-            Integer j = indices.get(1);
-            System.out.println(i + " " + j);
-            Boolean done = gridArray[i][j].setCharValue('X');
-            System.out.println(done);
-            
-        }));
-        
-        
+        return getInitGameBoard;
     }
 
     /**
@@ -130,8 +120,53 @@ public class CaroBoard {
         return new ArrayList<Integer>() {{ add(i); add(j); }};
     }
 
+    public void setNextTurnChar() {
+        if (this.currentTurn=='X') { currentTurn = 'O';}
+        else if (this.currentTurn=='O') { currentTurn = 'X';}
+        return;
+    }
+
+    public void gameProgress(CanvasWindow canva) {
+        canva.onClick((event -> {
+            if (gameState == 1 || gameState== -1 || fillUpNum >= numGridM*numGridN) {
+                System.out.println("The game is already won");
+                return;
+            }
+            List<Integer> indices = translatePointToGrid(event.getPosition());
+            if (indices == null) { return; }
+            
+            Integer i = indices.get(0); Integer j = indices.get(1);
+            Boolean markCharacterSuccess = gridArray[i][j].setCharValue(currentTurn);
+            if (markCharacterSuccess) 
+            { 
+                charArray[i][j] = currentTurn;
+                fillUpNum+=1;
+                gameState = winChecker.output(charArray, currentTurn, i, j);
+                setNextTurnChar();
+            }
+        }));   
+    }
+
+    public void printCharArray() {
+        for (int i = 0; i < numGridM; i++) {
+            for (int j = 0; j < numGridN; j++) {
+                System.out.print(charArray[i][j] + " ");
+            }
+            System.out.println(); // Move to the next line after printing each row
+        }
+    }
+
+    public void gameComplete() {  
+        // add components
+        CanvasWindow canva = new CanvasWindow("Caro Game", WIDTH, HEIGHT); 
+        canva.add(this.UI());
+        canva.add(this.getInitGameBoard());
+        canva.draw();
+        gameProgress(canva); 
+    }
+
     public static void main(String[] args) {
-        CaroBoard game = new CaroBoard(12, 15);
-        game.displayComplete();
+        CaroBoard game = new CaroBoard(12, 20);
+        game.gameComplete();
     }
 }
