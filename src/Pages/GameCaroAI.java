@@ -24,34 +24,37 @@ public class GameCaroAI extends GameCaro{
     protected void gameProgress(CanvasWindow canva) {
         canva.onClick((event -> {
             // end game
-            if (gameState == 1 || gameState == -1 || fillUpNum >= numGridM * numGridN) {
-                return;
-            }
-        
-            if (humanTurn) {
-                Boolean hasHumanCompletedTurn = humanPlay(event);
-                if (!hasHumanCompletedTurn) {
-                    // Human player didn't complete the turn, exit early
-                    return;
+            changeGameStatusUIVal();
+            if (gameState == 1 || gameState== -1 || fillUpNum >= numGridM*numGridN) { return;}
+            if (humanTurn) { 
+                Boolean hasHumanCompletedTurn = humanPlay(event); 
+                for (int t=0; t<1000; t++)
+                {
+                    if (hasHumanCompletedTurn) { break;}
+                    else {
+                        hasHumanCompletedTurn = humanPlay(event);
+                    }
                 }
                 humanTurn = !humanTurn;
-        
-                // Wait 1 second before the bot's move
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-        
-                if (!humanTurn) {
-                    botPlay();
-                    humanTurn = !humanTurn;
-                }
             }
-        
             changeGameStatusUIVal();
-        }));
+            if (gameState == 1 || gameState== -1 || fillUpNum >= numGridM*numGridN) { return;}
+            
+            if (!humanTurn)  {
+                
+                botPlay();
+                humanTurn = !humanTurn;
+            } 
+        }));   
     }
+
+    @Override
+    protected void resetGame() {
+            this.canva.closeWindow();
+            GameCaroAI newGame = new GameCaroAI(12, 20); 
+            newGame.gameComplete();
+        }
+    
 
     protected Boolean humanPlay(MouseButtonEvent event) {
         List<Integer> indices = translatePointToGrid(event.getPosition());
