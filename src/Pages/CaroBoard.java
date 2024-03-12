@@ -3,9 +3,12 @@ import edu.macalester.graphics.CanvasWindow;
 import edu.macalester.graphics.FontStyle;
 import edu.macalester.graphics.GraphicsGroup;
 import edu.macalester.graphics.GraphicsText;
+import edu.macalester.graphics.Image;
 import edu.macalester.graphics.Point;
 import edu.macalester.graphics.ui.*;
 import Mini_Components.Grid;
+
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.ArrayList;
@@ -30,6 +33,8 @@ public class CaroBoard {
     private CheckWin winChecker; 
     private int gameState = 0; private int fillUpNum=0;
 
+    private Image imageTurn;
+    private GraphicsText gameStatus;
 
 
     public CaroBoard(int numGridM, int numGridN) {
@@ -56,6 +61,7 @@ public class CaroBoard {
     }
 
     public GraphicsGroup UI() {
+        double unitX = WIDTH/ 20;
         double uiYLocation = HEIGHT/ 20;
         GraphicsGroup ui = new GraphicsGroup(boardStartX, uiYLocation);
         
@@ -64,16 +70,28 @@ public class CaroBoard {
         text.setFontStyle(FontStyle.BOLD);  // Set font style to bold
 
         Button playAgain = new Button("Play Again");
-        playAgain.setPosition(WIDTH*1/2.5 , 0);
+        playAgain.setPosition(10*unitX , 0);
         Button menu = new Button("Menu");
-        menu.setPosition(WIDTH*1/2.5+ 100, 0);
+        menu.setPosition(10*unitX+ 100, 0);
 
-        GraphicsText turn=  new GraphicsText("Current Turn",WIDTH*1/5,20);
+        GraphicsText status = new GraphicsText("Status", 7*unitX, 20);
+
+        GraphicsText turn=  new GraphicsText("Current Turn",4*unitX,20);
+        this.imageTurn = new Image(5.3*unitX, 0);
+        this.imageTurn.setMaxHeight(gridSize/2);
+        this.imageTurn.setMaxWidth(gridSize/2);
+        setXOImagePath();
+
+        this.gameStatus = new GraphicsText("", 7.75*unitX, 20 );
+        this.gameStatus.setFontStyle(FontStyle.BOLD);
+        this.gameStatus.setFontSize(20);
         ui.add(text);
         ui.add(turn);
         ui.add(playAgain);
         ui.add(menu);
-
+        ui.add(status);
+        ui.add(imageTurn);
+        ui.add(gameStatus);
         return ui;
     }
 
@@ -129,7 +147,6 @@ public class CaroBoard {
     public void gameProgress(CanvasWindow canva) {
         canva.onClick((event -> {
             if (gameState == 1 || gameState== -1 || fillUpNum >= numGridM*numGridN) {
-                System.out.println("The game is already won");
                 return;
             }
             List<Integer> indices = translatePointToGrid(event.getPosition());
@@ -140,11 +157,37 @@ public class CaroBoard {
             if (markCharacterSuccess) 
             { 
                 charArray[i][j] = currentTurn;
+                setXOImagePath();
                 fillUpNum+=1;
                 gameState = winChecker.output(charArray, currentTurn, i, j);
                 setNextTurnChar();
             }
+            changeGameStatusUIVal();
         }));   
+    }
+
+    public void changeGameStatusUIVal() {
+        if (gameState == 1) {
+            this.gameStatus.setText("X wins");
+            this.gameStatus.setFillColor(new Color(255,0,0));
+        } 
+        else if (gameState==-1) {
+            this.gameStatus.setText("O wins");
+            this.gameStatus.setFillColor(new Color(255,0,0));
+        }
+
+        else if (gameState==0 && fillUpNum== numGridM*numGridN) {
+            this.gameStatus.setText("Game Ties");
+            this.gameStatus.setFillColor(new Color(0,255,0));
+        }
+        else 
+            gameStatus.setText("Ongoing");
+    }
+
+    public void setXOImagePath() {
+        System.out.println("Hey I changed path???");
+        if (currentTurn == 'X') { this.imageTurn.setImagePath("img/X.png");}
+        else {imageTurn.setImagePath("img/O.png");}
     }
 
     public void printCharArray() {
