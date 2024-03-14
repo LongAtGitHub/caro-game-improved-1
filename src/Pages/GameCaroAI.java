@@ -31,10 +31,10 @@ public class GameCaroAI extends GameCaro{
     @Override
     protected void gameProgress(CanvasWindow canva) {
         // first time bot playing
-        if (!humanTurn)  {
-            botPlay();
-            humanTurn = !humanTurn;
-        } 
+        // if (!humanTurn)  {
+        //     botPlay();
+        //     humanTurn = !humanTurn;
+        // } 
         canva.onClick((event -> {
             // end game
             changeGameStatusUIVal();
