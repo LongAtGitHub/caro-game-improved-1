@@ -7,21 +7,34 @@ import edu.macalester.graphics.CanvasWindow;
 import edu.macalester.graphics.events.MouseButtonEvent;
 
 public class GameCaroAI extends GameCaro{
-    protected RandomBot randoBot;
-    private Boolean humanTurn = true;
-
-    public GameCaroAI(int numGridM, int numGridN) {
-        super(numGridM, numGridN);
-        this.randoBot = new RandomBot(numGridM, numGridN);
+    public static void main(String[] args) {
+        GameCaroAI game = new GameCaroAI(12,20, false);
+        game.gameComplete();
     }
 
-    public GameCaroAI() {
-        super();
-        this.randoBot = new RandomBot(numGridM, numGridN);
+
+    protected RandomBot randoBot;
+
+    private Boolean humanTurn;
+    private Boolean humanPlayFirst;
+    private Character robotMark;
+
+    public GameCaroAI(int numGridM, int numGridN, Boolean humanPlayFirst) {
+        super(numGridM, numGridN);
+        this.humanTurn = humanPlayFirst;
+        this.humanPlayFirst = humanPlayFirst;
+        if (humanPlayFirst) this.randoBot = new RandomBot(numGridM, numGridN,'O');
+        else this.randoBot = new RandomBot(numGridM, numGridN,'X');
+        
     }
 
     @Override
     protected void gameProgress(CanvasWindow canva) {
+        // first time bot playing
+        if (!humanTurn)  {
+            botPlay();
+            humanTurn = !humanTurn;
+        } 
         canva.onClick((event -> {
             // end game
             changeGameStatusUIVal();
@@ -36,14 +49,12 @@ public class GameCaroAI extends GameCaro{
                 humanTurn = !humanTurn;
             }
 
-            System.out.println("hey I should be here first");
             canva.draw();
             delay(500);
 
             changeGameStatusUIVal();
             if (gameState == 1 || gameState== -1 || fillUpNum >= numGridM*numGridN) { return;}
             if (!humanTurn)  {
-                
                 botPlay();
                 humanTurn = !humanTurn;
             } 
@@ -51,21 +62,27 @@ public class GameCaroAI extends GameCaro{
     }
 
     // Define a method to handle the sleep with InterruptedException
-public void delay(long milliseconds) {
-    try {
-        Thread.sleep(milliseconds);
-    } catch (InterruptedException e) {
-        e.printStackTrace();
+    public void delay(long milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
-}
+
     @Override
     protected void resetGame() {
         this.canva.closeWindow();
-        GameCaroAI newGame = new GameCaroAI(12, 20); 
+        GameCaroAI newGame = new GameCaroAI(numGridM, numGridN, this.humanPlayFirst); 
         newGame.gameComplete();
     }
     
 
+    /**
+     * 
+     * @param event mouse event click
+     * @return true if human makes a correct move
+     */
     protected Boolean humanPlay(MouseButtonEvent event) {
         List<Integer> indices = translatePointToGrid(event.getPosition());
         if (indices == null) { return false;}
@@ -84,8 +101,12 @@ public void delay(long milliseconds) {
         return false;
     }
 
+    /**
+     * 
+     * @return true if bot plays a legal move
+     */
     protected Boolean botPlay() {
-        int[] botOuput = randoBot.output(currentTurn, charArray);
+        int[] botOuput = randoBot.output(charArray);
         int i = botOuput[0]; int j = botOuput[1];
         Boolean markCharacterSuccess = gridArray[i][j].setCharValue(currentTurn);
         if (markCharacterSuccess) 
@@ -97,12 +118,9 @@ public void delay(long milliseconds) {
             setNextTurnChar();
             return true;
         }
-        return true;
+        return false;
     }
 
-    public static void main(String[] args) {
-        GameCaroAI game = new GameCaroAI();
-        game.gameComplete();
-    }
+    
 }
 

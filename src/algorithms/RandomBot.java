@@ -3,23 +3,20 @@ package algorithms;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class RandomBot  {
-    // Define the DumbBot class implementing the Bot interface
-    private Character[][] charArr;
-    private int nrow ;
-    private int ncol ;
-    private ArrayList<int[]> possibleMove;
+public class RandomBot extends Robot {
+    // private int nrow ;
+    // private int ncol ;
+    // private ArrayList<int[]> possibleMove;
 
-    private int outputI, outputJ;
-    private char outputChar;
+    // private int outputI, outputJ;
 
-    public RandomBot(int nrow, int ncol) {
-        this.nrow = nrow;
-        this.ncol = ncol;
+    public RandomBot(int nrow, int ncol, Character markPlay) {
+        super(nrow, ncol, markPlay);
     }
 
 
-    public int[] output(Character markToPlay, Character[][] charArr) {
+    @Override
+    public int[] output( Character[][] charArr) {
         setPosssibleMove(charArr);
         Random random = new Random();
         int randomIndex = random.nextInt(possibleMove.size());
