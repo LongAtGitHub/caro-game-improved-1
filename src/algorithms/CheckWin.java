@@ -12,6 +12,7 @@ public class CheckWin {
     private Integer m,n;
     private Integer recentI, recentJ, targetCount;
     private Character charVal;
+
     /**
      * 
      * @param m nrow of the board
@@ -34,9 +35,9 @@ public class CheckWin {
      * @param recentChar pass in recent char
      * @param recentI
      * @param recentJ
-     * @return 0 (tie, the game can still resume), 1 (X wins), -1 (O wins)
+     * @return null (tie, the game can still resume), 1 (X wins), -1 (O wins)
      */
-    public int output(
+    public Integer output(
         Character[][] arr, 
         Character recentChar, 
         Integer recentI,
@@ -100,4 +101,8 @@ public class CheckWin {
     private boolean checkBound(Integer i, Integer j) {
         return (0<=i && i<m && 0<=j && j<n);
     }
+
+    // public String printResult() {
+        
+    // }
 }
